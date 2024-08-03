@@ -23,8 +23,6 @@ jobs:
       JWT_PUBLIC_KEY_BASE64: ${{ secrets.JWT_PUBLIC_KEY_BASE64 }}
       JWT_PRIVATE_KEY_BASE64: ${{ secrets.JWT_PRIVATE_KEY_BASE64 }}
       DEFAULT_ADMIN_USER_PASSWORD: example_admin_pass
-      REDIS_HOST: localhost
-      REDIS_PORT: 6379
 
     steps:
       - uses: actions/checkout@v3
@@ -42,7 +40,7 @@ jobs:
       - name: Run unit tests
         run: npm test
       - name: Build the docker-compose stack
-        run: docker-compose -f docker-compose.yml up -d pgsqldb
+        run: docker compose -f docker-compose.yml up -d pgsqldb
       - name: Check running containers
         run: docker ps -a
       - name: Run e2e tests
@@ -51,5 +49,3 @@ jobs:
         run: npm run test:cov
       - name: Coveralls GitHub Action
         uses: coverallsapp/github-action@v2.3.0
-            
-

@@ -22,6 +22,7 @@ import { Express } from 'express';
 
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import {
+  BaseApiErrorResponse,
   BaseApiResponse,
   SwaggerBaseApiResponse,
 } from '../../shared/dtos/base-api-response.dto';
@@ -47,6 +48,14 @@ export class FileController {
     status: HttpStatus.CREATED,
     type: SwaggerBaseApiResponse(FileUploadOutput),
   })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    type: BaseApiErrorResponse,
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    type: BaseApiErrorResponse,
+  })
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(ClassSerializerInterceptor)
@@ -64,11 +73,15 @@ export class FileController {
 
   @Get(':publicKey')
   @ApiOperation({
-    summary: 'Get File API',
+    summary: 'Download File API',
   })
   @ApiResponse({
     status: HttpStatus.OK,
     type: SwaggerBaseApiResponse([]),
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    type: BaseApiErrorResponse,
   })
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
@@ -91,6 +104,14 @@ export class FileController {
   })
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    type: BaseApiErrorResponse,
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    type: BaseApiErrorResponse,
+  })
   async deleteFile(
     @ReqContext() ctx: RequestContext,
     @Param('privateKey') privateKey: string,

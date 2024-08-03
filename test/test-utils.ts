@@ -29,8 +29,7 @@ export const resetDBBeforeTest = async (): Promise<void> => {
     password: 'example',
     database: 'postgres',
   });
-  
-  
+
   await connection.query(`drop database if exists ${TEST_DB_NAME}`);
   await connection.query(`create database ${TEST_DB_NAME}`);
 
@@ -86,6 +85,42 @@ export const seedAdminUser = async (
   const adminUser: UserOutput = JSON.parse(JSON.stringify(userOutput));
 
   return { adminUser, authTokenForAdmin };
+};
+
+export const seedUser = async (
+  app: INestApplication,
+): Promise<{ user: UserOutput; authTokenForUser: AuthTokenOutput }> => {
+  const defaultUser: CreateUserInput = {
+    name: 'Default User',
+    username: 'default-username',
+    password: 'default-password',
+    roles: [ROLE.USER],
+    isAccountDisabled: false,
+    email: 'user@example.com',
+  };
+
+  const ctx = new RequestContext();
+
+  // Creating User
+  const userService = app.get(UserService);
+  const userOutput = await userService.createUser(ctx, defaultUser);
+
+  const loginInput: LoginInput = {
+    username: defaultUser.username,
+    password: defaultUser.password,
+  };
+
+  // Logging in Admin User to get AuthToken
+  const loginResponse = await request(app.getHttpServer())
+    .post('/auth/login')
+    .send(loginInput)
+    .expect(HttpStatus.OK);
+
+  const authTokenForUser: AuthTokenOutput = loginResponse.body.data;
+
+  const user: UserOutput = JSON.parse(JSON.stringify(userOutput));
+
+  return { user, authTokenForUser };
 };
 
 export const closeDBAfterTest = async (): Promise<void> => {
