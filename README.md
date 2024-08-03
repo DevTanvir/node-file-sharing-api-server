@@ -1,8 +1,7 @@
-## Text Analyzer App
+## Node file sharing API server
 
-[![build](https://github.com/DevTanvir/text-analyzer-app/actions/workflows/build-workflow.yml/badge.svg?branch=master&event=push)](https://github.com/DevTanvir/text-analyzer-app/actions/workflows/build-workflow.yml)
-[![tests](https://github.com/DevTanvir/text-analyzer-app/actions/workflows/tests-workflow.yml/badge.svg?branch=master&event=push)](https://github.com/DevTanvir/text-analyzer-app/actions/workflows/tests-workflow.yml)
-
+[![build](https://github.com/DevTanvir/node-file-sharing-api-server/actions/workflows/build-workflow.yml/badge.svg?branch=master&event=push)](https://github.com/DevTanvir/node-file-sharing-api-server/actions/workflows/build-workflow.yml)
+[![tests](https://github.com/DevTanvir/node-file-sharing-api-server/actions/workflows/tests-workflow.yml/badge.svg?branch=master&event=push)](https://github.com/DevTanvir/node-file-sharing-api-server/actions/workflows/tests-workflow.yml)
 
 An implementation of nodejs file sharing api server
 
@@ -13,13 +12,12 @@ This app has the following outline:
 - Swagger UI
 - Dockerized
 
-
 ## Overview
 
-For building this app I've used an OSS template in which I was a core contributor. 
-This is a fast and light-weight template for starting new nodejs projects with nestjs framework. 
+For building this app I've used an OSS template in which I was a core contributor.
+This is a fast and light-weight template for starting new nodejs projects with nestjs framework.
 
-Below are all the steps necessary to run the app locally, Docker steps are preferred, but you can run it without docker as well. Please contact me at tanveer.cyborg@gmail.com for any questions or clarifications. 
+Below are all the steps necessary to run the app locally, Docker steps are preferred, but you can run it without docker as well. Please contact me at tanveer.cyborg@gmail.com for any questions or clarifications.
 
 ## Installation
 
@@ -79,28 +77,27 @@ Must enter the base64 of the key files in `.env`:
 JWT_PUBLIC_KEY_BASE64=BASE64_OF_JWT_PUBLIC_KEY
 JWT_PRIVATE_KEY_BASE64=BASE64_OF_JWT_PRIVATE_KEY
 ```
+
 NOTE: if you are on a windows OS you might need extra steps to convert these jwt keys to base64 content. (e.g. you can use git bash to covert the keys)
 
 ## Running the app
 
 We can run the project with or without docker. (docker preferred)
 
-
 ### Docker
 
 ```bash
 # build image
-$ docker build -t text-analyzer-app .
+$ docker build -t node-file-sharing-api-server .
 
 # run container from image
-$ docker run -p 3000:3000 --volume 'pwd':/usr/src/app --network --env-file .env text-analyzer-app
+$ docker run -p 3000:3000 --volume 'pwd':/usr/src/app --network --env-file .env node-file-sharing-api-server
 
 # run using docker compose
 $ docker compose up
 ```
 
 After the server starts go to your browser and type-in localhost:3000/swagger. There you can see the list of APIs to be used. but before that you need to run migrations! check below for migrations steps.
-
 
 ### Local
 
@@ -121,7 +118,6 @@ $ npm run start:dev
 
 After the server starts go to your browser and type-in localhost:3000/swagger. There you can see the list of APIs to be used. but before that you need to run migrations! check below for migration steps.
 
-
 ## Migrations
 
 To run the migration files use the below commands.
@@ -137,7 +133,6 @@ $ npm run migration:run
 $ npm run migration:revert
 ```
 
-
 ## Test
 
 ```bash
@@ -147,7 +142,6 @@ $ npm run test
 # to run the test coverage use the below command
 $ npm run test:cov
 ```
-
 
 ## Architecture
 
