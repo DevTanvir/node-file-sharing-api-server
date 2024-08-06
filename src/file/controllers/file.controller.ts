@@ -18,6 +18,7 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 import { Express } from 'express';
 
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
@@ -72,6 +73,7 @@ export class FileController {
   }
 
   @Get(':publicKey')
+  @Throttle({ default: { limit: 3, ttl: 60000 } }) // manual override if needed
   @ApiOperation({
     summary: 'Download File API',
   })

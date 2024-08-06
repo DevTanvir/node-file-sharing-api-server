@@ -98,7 +98,7 @@ export class FileService implements FileInterface {
 
     await this.fileRepository.delete(file.id);
 
-    const filePath = path.join(this.folder, file.filePath);
+    const filePath = file.filePath;
     await fs.unlink(filePath);
 
     return { message: `File ${file.fileName} deleted successfully` };
