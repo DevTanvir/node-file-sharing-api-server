@@ -83,6 +83,10 @@ export class FileController {
     status: HttpStatus.BAD_REQUEST,
     type: BaseApiErrorResponse,
   })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    type: BaseApiErrorResponse,
+  })
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   async getFile(
@@ -110,6 +114,10 @@ export class FileController {
   })
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,
+    type: BaseApiErrorResponse,
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
     type: BaseApiErrorResponse,
   })
   async deleteFile(
