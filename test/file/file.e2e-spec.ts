@@ -96,46 +96,99 @@ describe('FileController (e2e)', () => {
         .expect(HttpStatus.NOT_FOUND)
         .expect({ message: 'File not found' });
     });
-  });
 
-  describe('delete file', () => {
-    const file = {
-      publicKey: 'a891ca32-b42e-4a94-b636-7c0a202aaa8f',
-      privateKey: 'bdd5a5ef-7ace-4f93-81f1-281735a3d181',
-      fileBuffer: Buffer.from('test file'),
-      mimeType: 'text/plain',
-      filePath: 'path/to/file.txt',
-      fileName: 'file.txt',
-      createdBy: 'testUser',
-    };
+    describe('Create a new file', () => {
+      it('should successfully create a new file', async () => {
+        return request(app.getHttpServer())
+          .post('/files')
+          .set('Authorization', 'Bearer ' + authTokenForUser.accessToken)
+          .expect(HttpStatus.CREATED)
+          .expect((res) => {
+            const resp = res.body;
+            expect(resp).toEqual({
+              publicKey: 'test-key1',
+              privateKey: 'test-key2',
+            });
+          });
+      });
 
-    it('deletes a file', async () => {
-      return request(app.getHttpServer())
-        .delete(`/files/${file.privateKey}`)
-        .set('Authorization', 'Bearer ' + authTokenForUser.accessToken)
-        .expect(HttpStatus.OK)
-        .expect({ message: `File ${file.fileName} deleted successfully` });
+      it('should fail to create a new file without Input DTO', async () => {
+        return request(app.getHttpServer())
+          .post('/files')
+          .set('Authorization', 'Bearer ' + authTokenForUser.accessToken)
+          .expect(HttpStatus.BAD_REQUEST);
+      });
+
+      it('should fail to create a new file with incorrect file format', async () => {
+        return request(app.getHttpServer())
+          .post('/files')
+          .set('Authorization', 'Bearer ' + authTokenForUser.accessToken)
+          .attach('file', 'test/test.txt')
+          .expect(HttpStatus.BAD_REQUEST);
+      });
+      it('should fail to create new file when user is not authenticated', async () => {
+        return request(app.getHttpServer())
+          .post('/files')
+          .expect(HttpStatus.UNAUTHORIZED);
+      });
     });
 
-    it('returns NotFoundException when file is not found', async () => {
-      return request(app.getHttpServer())
-        .delete('/files/12345')
-        .set('Authorization', 'Bearer ' + authTokenForUser.accessToken)
-        .expect(HttpStatus.NOT_FOUND)
-        .expect({ message: 'File not found' });
+    describe('download file', () => {
+      it('should return the target file', async () => {
+        return request(app.getHttpServer())
+          .get('/files')
+          .send({ publicKey: 'test-key' })
+          .set('Authorization', 'Bearer ' + authTokenForUser.accessToken)
+          .expect(HttpStatus.OK);
+      });
+
+      it('should fail when public key is not provided', async () => {
+        return request(app.getHttpServer())
+          .get('/files')
+          .send({ publicKey: '' })
+          .expect(HttpStatus.BAD_REQUEST);
+      });
     });
 
-    it('returns UnauthorizedException when user is not authorized', async () => {
-      return request(app.getHttpServer())
-        .delete(`/files/${file.privateKey}`)
-        .set('Authorization', 'Bearer ' + authTokenForUser.accessToken)
-        .expect(HttpStatus.UNAUTHORIZED)
-        .expect({ message: 'Unauthorized' });
-    });
-  });
+    describe('delete file', () => {
+      const file = {
+        publicKey: 'a891ca32-b42e-4a94-b636-7c0a202aaa8f',
+        privateKey: 'bdd5a5ef-7ace-4f93-81f1-281735a3d181',
+        fileBuffer: Buffer.from('test file'),
+        mimeType: 'text/plain',
+        filePath: 'path/to/file.txt',
+        fileName: 'file.txt',
+        createdBy: 'testUser',
+      };
 
-  afterAll(async () => {
-    await app.close();
-    await closeDBAfterTest();
+      it('deletes a file', async () => {
+        return request(app.getHttpServer())
+          .delete(`/files/${file.privateKey}`)
+          .set('Authorization', 'Bearer ' + authTokenForUser.accessToken)
+          .expect(HttpStatus.OK)
+          .expect({ message: `File ${file.fileName} deleted successfully` });
+      });
+
+      it('returns NotFoundException when file is not found', async () => {
+        return request(app.getHttpServer())
+          .delete('/files/12345')
+          .set('Authorization', 'Bearer ' + authTokenForUser.accessToken)
+          .expect(HttpStatus.NOT_FOUND)
+          .expect({ message: 'File not found' });
+      });
+
+      it('returns UnauthorizedException when user is not authorized', async () => {
+        return request(app.getHttpServer())
+          .delete(`/files/${file.privateKey}`)
+          .set('Authorization', 'Bearer ' + authTokenForUser.accessToken)
+          .expect(HttpStatus.UNAUTHORIZED)
+          .expect({ message: 'Unauthorized' });
+      });
+    });
+
+    afterAll(async () => {
+      await app.close();
+      await closeDBAfterTest();
+    });
   });
 });

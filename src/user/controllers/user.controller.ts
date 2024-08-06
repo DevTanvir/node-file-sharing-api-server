@@ -16,6 +16,7 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { SkipThrottle } from '@nestjs/throttler';
 
 import { ROLE } from '../../auth/constants/role.constant';
 import { Roles } from '../../auth/decorators/role.decorator';
@@ -35,6 +36,7 @@ import { UpdateUserInput } from '../dtos/user-update-input.dto';
 import { UserService } from '../services/user.service';
 
 @ApiTags('users')
+@SkipThrottle() // Skip throttling for USER services
 @Controller('users')
 export class UserController {
   constructor(

@@ -49,6 +49,8 @@ describe('FileService', () => {
 
   it('should be defined', () => {
     expect(service).toBeDefined();
+<<<<<<< HEAD
+=======
   });
 
   const ctx = new RequestContext();
@@ -103,41 +105,138 @@ describe('FileService', () => {
     afterEach(() => {
       jest.clearAllMocks();
     });
+>>>>>>> 686b4bc (fix: docker compose build error for github actions, attempt 6)
   });
 
-  describe('downloadFile', () => {
-    it('should download the file and send it as a response', async () => {
-      const publicKey = 'testPublicKey';
-      const file = {
-        mimeType: 'text/plain',
-        fileBuffer: Buffer.from('test content'),
+  const ctx = new RequestContext();
+
+  describe('uploadFile', () => {
+    it('should upload file successfully', async () => {
+      const file: Express.Multer.File = {
+        fieldname: 'fileField',
+        originalname: 'test.txt',
+        encoding: '7bit',
+        mimetype: 'text/plain',
+        size: 1024,
+        buffer: Buffer.from('test'),
+        stream: Readable.from('test'),
+        destination: 'file/path',
+        filename: 'test.txt',
+        path: 'sample path string',
       };
-      mockedFileRepository.getByPublicKey.mockResolvedValue(file);
-
-      const res = {
-        setHeader: jest.fn(),
-        send: jest.fn(),
+      ctx.user = {
+        id: 1,
+        roles: [ROLE.USER],
+        username: 'testuser',
       };
+      const publicKey = 'mock-uuid';
+      const privateKey = 'mock-uuid';
+      const uniqueIdforFile = uuidv4();
 
-      await service.downloadFile(publicKey, res);
-
-      expect(fileRepository.getByPublicKey).toHaveBeenCalledWith(publicKey);
-      expect(res.setHeader).toHaveBeenCalledWith('Content-Type', file.mimeType);
-      expect(res.setHeader).toHaveBeenCalledWith(
-        'Content-Disposition',
-        `attachment; filename="${publicKey}"`,
+      const filePath = path.join(
+        'uploads',
+        `${uniqueIdforFile}-${file.originalname}`,
       );
-      expect(res.send).toHaveBeenCalledWith(file.fileBuffer);
+      const uploadFileDetail = {
+        publicKey,
+        privateKey,
+        fileBuffer: file.buffer,
+        mimeType: file.mimetype,
+        filePath,
+        fileName: file.originalname,
+        createdBy: ctx.user!.id,
+      };
+      const output: FileUploadOutput = { publicKey, privateKey };
+
+      jest.spyOn(fs, 'writeFile').mockResolvedValue();
+
+      const result = await service.uploadFile(ctx, file);
+
+      expect(fileRepository.save).toHaveBeenCalledWith(uploadFileDetail);
+      expect(fs.writeFile).toHaveBeenCalledWith(filePath, file.buffer);
+      expect(result).toEqual(output);
     });
 
-    it('should throw NotFoundException if the file is not found', async () => {
-      const publicKey = 'testPublicKey';
-      mockedFileRepository.getByPublicKey.mockResolvedValue(null);
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
 
-      await expect(service.downloadFile(publicKey, {} as any)).rejects.toThrow(
-        NotFoundException,
-      );
-      expect(fileRepository.getByPublicKey).toHaveBeenCalledWith(publicKey);
+    describe('downloadFile', () => {
+      it('should download the file and send it as a response', async () => {
+        const publicKey = 'testPublicKey';
+        const file = {
+          mimeType: 'text/plain',
+          fileBuffer: Buffer.from('test content'),
+        };
+        mockedFileRepository.getByPublicKey.mockResolvedValue(file);
+
+        const res = {
+          setHeader: jest.fn(),
+          send: jest.fn(),
+        };
+
+        await service.downloadFile(publicKey, res);
+
+        expect(fileRepository.getByPublicKey).toHaveBeenCalledWith(publicKey);
+        expect(res.setHeader).toHaveBeenCalledWith(
+          'Content-Type',
+          file.mimeType,
+        );
+        expect(res.setHeader).toHaveBeenCalledWith(
+          'Content-Disposition',
+          `attachment; filename="${publicKey}"`,
+        );
+        expect(res.send).toHaveBeenCalledWith(file.fileBuffer);
+      });
+
+      it('should throw NotFoundException if the file is not found', async () => {
+        const publicKey = 'testPublicKey';
+        mockedFileRepository.getByPublicKey.mockResolvedValue(null);
+
+        await expect(
+          service.downloadFile(publicKey, {} as any),
+        ).rejects.toThrow(NotFoundException);
+        expect(fileRepository.getByPublicKey).toHaveBeenCalledWith(publicKey);
+      });
+
+      afterEach(() => {
+        jest.clearAllMocks();
+      });
+    });
+
+    describe('deleteFile', () => {
+      it('should delete file and return message when user has permission', async () => {
+        const privateKey = 'mock-uuid';
+        const file = new FileEntity();
+        file.createdBy = 1;
+        file.filePath = 'path/to/test.txt';
+        file.fileName = 'test';
+
+        ctx.user = {
+          id: 1,
+          roles: [ROLE.USER],
+          username: 'testuser',
+        };
+
+        mockedFileRepository.getByPrivateKey.mockResolvedValue(file);
+        jest.spyOn(fs, 'unlink').mockResolvedValue();
+        const expectedOutput = {
+          message: `File ${file.fileName} deleted successfully`,
+        };
+
+        const result = await service.deleteFile(ctx, privateKey);
+
+        expect(result).toEqual(expectedOutput);
+        expect(fileRepository.getByPrivateKey).toHaveBeenCalledWith(privateKey);
+        expect(fileRepository.delete).toHaveBeenCalledWith(file.id);
+      });
+
+      afterEach(() => {
+        jest.clearAllMocks();
+      });
     });
 
     afterEach(() => {
