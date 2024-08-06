@@ -9,6 +9,7 @@ This app has the following outline:
 
 - Monolithic Project
 - REST API
+- API Throttling
 - Swagger UI
 - Dockerized
 
@@ -16,6 +17,10 @@ This app has the following outline:
 
 For building this app I've used an OSS template in which I was a core contributor.
 This is a fast and light-weight template for starting new nodejs projects with nestjs framework.
+
+For uploading and downloading images I've used Express multer, All the necessary data keys are uuid v4 format with a chance of duplicity one in a billion ( which is quite a big number if you ask me). I've also added USER and AUTH modules for a real-time web application experience, there is also a CLI system to seed admin users. I've also implemented ACL system so operations like delete are more secure. All the sensitive and configurable variables are stored in .env files. I've stored all the data in persistent DB rather than in-memory, for that purpose I've used the popular Postgres DB. I've added nests native api throttling service to regulate each IP address to a minimum amount of requests they can make. Unit tests and Integrations tests are there as well.
+
+- I've Yet to add Cron Job and Google storage service. and a fix failing test that is happening on github actions.
 
 Below are all the steps necessary to run the app locally, Docker steps are preferred, but you can run it without docker as well. Please contact me at tanveer.cyborg@gmail.com for any questions or clarifications.
 
