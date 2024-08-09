@@ -1,4 +1,5 @@
 import {
+  Body,
   ClassSerializerInterceptor,
   Controller,
   Delete,
@@ -30,14 +31,17 @@ import {
 import { AppLogger } from '../../shared/logger/logger.service';
 import { ReqContext } from '../../shared/request-context/req-context.decorator';
 import { RequestContext } from '../../shared/request-context/request-context.dto';
+import { UpdateEnvInput } from '../dtos/file-update-env-input.dto';
 import { FileUploadOutput } from '../dtos/file-upload-output.dto';
 import { FileService } from '../services/file.service';
+import { GoogleStorageService } from '../services/google-storage.service';
 
 @ApiTags('files')
 @Controller('files')
 export class FileController {
   constructor(
     private readonly fileService: FileService,
+    private readonly googleStorageService: GoogleStorageService,
     private readonly logger: AppLogger,
   ) {}
 
@@ -126,9 +130,34 @@ export class FileController {
     @ReqContext() ctx: RequestContext,
     @Param('privateKey') privateKey: string,
   ): Promise<void> {
-    this.logger.log(ctx, `${this.getFile.name} was called`);
+    this.logger.log(ctx, `${this.deleteFile.name} was called`);
 
     const deleted = await this.fileService.deleteFile(ctx, privateKey);
     return deleted;
+  }
+
+  @Post('update-env')
+  @ApiOperation({
+    summary: 'Update ENV file API (ADMIN ONLY)',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    type: SwaggerBaseApiResponse([]),
+  })
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    type: BaseApiErrorResponse,
+  })
+  async updateEnv(
+    @ReqContext() ctx: RequestContext,
+    @Body() input: UpdateEnvInput,
+  ): Promise<string> {
+    this.logger.log(ctx, `${this.updateEnv.name} was called`);
+
+    await this.fileService.updateEnv(ctx, input);
+
+    return 'Successfully updated .env file';
   }
 }

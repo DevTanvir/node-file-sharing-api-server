@@ -1,10 +1,12 @@
 import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
+import { ScheduleModule } from '@nestjs/schedule';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
+import { CleanupService } from './common/cleanup.service';
 import { FileModule } from './file/file.module';
 import { SharedModule } from './shared/shared.module';
 import { UserModule } from './user/user.module';
@@ -25,10 +27,12 @@ import { UserModule } from './user/user.module';
           : 10, // 10 times
       },
     ]),
+    ScheduleModule.forRoot(),
   ],
   controllers: [AppController],
   providers: [
     AppService,
+    CleanupService,
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
