@@ -34,14 +34,12 @@ import { RequestContext } from '../../shared/request-context/request-context.dto
 import { UpdateEnvInput } from '../dtos/file-update-env-input.dto';
 import { FileUploadOutput } from '../dtos/file-upload-output.dto';
 import { FileService } from '../services/file.service';
-import { GoogleStorageService } from '../services/google-storage.service';
 
 @ApiTags('files')
 @Controller('files')
 export class FileController {
   constructor(
     private readonly fileService: FileService,
-    private readonly googleStorageService: GoogleStorageService,
     private readonly logger: AppLogger,
   ) {}
 
