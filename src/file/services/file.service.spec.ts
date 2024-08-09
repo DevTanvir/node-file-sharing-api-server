@@ -49,63 +49,6 @@ describe('FileService', () => {
 
   it('should be defined', () => {
     expect(service).toBeDefined();
-<<<<<<< HEAD
-=======
-  });
-
-  const ctx = new RequestContext();
-
-  describe('uploadFile', () => {
-    it('should upload file successfully', async () => {
-      const file: Express.Multer.File = {
-        fieldname: 'fileField',
-        originalname: 'test.txt',
-        encoding: '7bit',
-        mimetype: 'text/plain',
-        size: 1024,
-        buffer: Buffer.from('test'),
-        stream: Readable.from('test'),
-        destination: 'file/path',
-        filename: 'test.txt',
-        path: 'sample path string',
-      };
-      ctx.user = {
-        id: 1,
-        roles: [ROLE.USER],
-        username: 'testuser',
-      };
-      const publicKey = 'mock-uuid';
-      const privateKey = 'mock-uuid';
-      const uniqueIdforFile = uuidv4();
-
-      const filePath = path.join(
-        'uploads',
-        `${uniqueIdforFile}-${file.originalname}`,
-      );
-      const uploadFileDetail = {
-        publicKey,
-        privateKey,
-        fileBuffer: file.buffer,
-        mimeType: file.mimetype,
-        filePath,
-        fileName: file.originalname,
-        createdBy: ctx.user!.id,
-      };
-      const output: FileUploadOutput = { publicKey, privateKey };
-
-      jest.spyOn(fs, 'writeFile').mockResolvedValue();
-
-      const result = await service.uploadFile(ctx, file);
-
-      expect(fileRepository.save).toHaveBeenCalledWith(uploadFileDetail);
-      expect(fs.writeFile).toHaveBeenCalledWith(filePath, file.buffer);
-      expect(result).toEqual(output);
-    });
-
-    afterEach(() => {
-      jest.clearAllMocks();
-    });
->>>>>>> 686b4bc (fix: docker compose build error for github actions, attempt 6)
   });
 
   const ctx = new RequestContext();

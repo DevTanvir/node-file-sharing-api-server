@@ -8,10 +8,17 @@ import { FileEntity } from './entities/file.entity';
 import { FileRepository } from './repositories/file.repository';
 import { FileService } from './services/file.service';
 import { FileAclService } from './services/file-acl.service';
+import { GoogleStorageService } from './services/google-storage.service';
 
 @Module({
   imports: [SharedModule, TypeOrmModule.forFeature([FileEntity])],
-  providers: [FileService, FileAclService, JwtAuthStrategy, FileRepository],
+  providers: [
+    FileService,
+    GoogleStorageService,
+    FileAclService,
+    JwtAuthStrategy,
+    FileRepository,
+  ],
   controllers: [FileController],
   exports: [FileService],
 })
