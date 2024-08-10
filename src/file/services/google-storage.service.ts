@@ -89,7 +89,7 @@ export class GoogleStorageService implements IStorageService {
   async downloadFile(publicKey: string, res: any): Promise<any> {
     const file = await this.fileRepository.getByPublicKey(publicKey);
 
-    if (!file || file.storageType === 'local') {
+    if (!file) {
       throw new NotFoundException('File not found');
     }
 
@@ -116,7 +116,7 @@ export class GoogleStorageService implements IStorageService {
   async deleteFile(ctx: RequestContext, privateKey: string): Promise<any> {
     const file = await this.fileRepository.getByPrivateKey(privateKey);
 
-    if (!file || file.storageType === 'local') {
+    if (!file) {
       throw new NotFoundException('File not found');
     }
 

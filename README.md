@@ -9,6 +9,8 @@ This app has the following outline:
 
 - Monolithic Project
 - REST API
+- API Throttling
+- Google Bucket Storage
 - Swagger UI
 - Dockerized
 
@@ -16,6 +18,12 @@ This app has the following outline:
 
 For building this app I've used an OSS template in which I was a core contributor.
 This is a fast and light-weight template for starting new nodejs projects with nestjs framework.
+
+This application can handle file upload, download and delete both locally and using cloud storage.
+It is equipped authentication and user module for a more secured and standardized user-based procedure. It has a configurable API throttling system for each IP which can be over-ridden per API as well. A automated local storage cleanup service to remove files from the FOLDER directory (we can setup a cleanup service for Google storage as well from the GCP console!). It is Dockerized to work in any environment regardless of the HOST Machine. I've also included ACL system for Uploading and Deleting file.
+
+- All configurations options are handled from ENV file.
+- All google cloud storage secret will be passed through email, as I've set-up github branch protections rules that stops anyone from passing SECRETS even accidentally.
 
 Below are all the steps necessary to run the app locally, Docker steps are preferred, but you can run it without docker as well. Please contact me at tanveer.cyborg@gmail.com for any questions or clarifications.
 
