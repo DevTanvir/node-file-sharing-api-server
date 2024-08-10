@@ -33,4 +33,12 @@ export class FileRepository extends Repository<FileEntity> {
     }
     return file;
   }
+
+  async getByFilePath(filePath: string): Promise<FileEntity> {
+    const file = await this.findOne({ where: { filePath } });
+    if (!file) {
+      throw new NotFoundException();
+    }
+    return file;
+  }
 }

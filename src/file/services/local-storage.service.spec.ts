@@ -11,15 +11,15 @@ import { RequestContext } from '../../shared/request-context/request-context.dto
 import { FileUploadOutput } from '../dtos/file-upload-output.dto';
 import { FileEntity } from '../entities/file.entity';
 import { FileRepository } from '../repositories/file.repository';
-import { FileService } from './file.service';
 import { FileAclService } from './file-acl.service';
+import { LocalStorageService } from './local-storage.service';
 
 jest.mock('uuid', () => ({
   v4: jest.fn(() => 'mock-uuid'),
 }));
 
-describe('FileService', () => {
-  let service: FileService;
+describe('LocalStorageService', () => {
+  let service: LocalStorageService;
   let fileRepository: FileRepository;
 
   const mockedFileRepository = {
@@ -33,7 +33,7 @@ describe('FileService', () => {
     const mockedLogger = { setContext: jest.fn(), log: jest.fn() };
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        FileService,
+        LocalStorageService,
         {
           provide: FileRepository,
           useValue: mockedFileRepository,
@@ -43,14 +43,12 @@ describe('FileService', () => {
       ],
     }).compile();
 
-    service = module.get<FileService>(FileService);
+    service = module.get<LocalStorageService>(LocalStorageService);
     fileRepository = module.get<FileRepository>(FileRepository);
   });
 
   it('should be defined', () => {
     expect(service).toBeDefined();
-<<<<<<< HEAD
-=======
   });
 
   const ctx = new RequestContext();
@@ -89,61 +87,7 @@ describe('FileService', () => {
         mimeType: file.mimetype,
         filePath,
         fileName: file.originalname,
-        createdBy: ctx.user!.id,
-      };
-      const output: FileUploadOutput = { publicKey, privateKey };
-
-      jest.spyOn(fs, 'writeFile').mockResolvedValue();
-
-      const result = await service.uploadFile(ctx, file);
-
-      expect(fileRepository.save).toHaveBeenCalledWith(uploadFileDetail);
-      expect(fs.writeFile).toHaveBeenCalledWith(filePath, file.buffer);
-      expect(result).toEqual(output);
-    });
-
-    afterEach(() => {
-      jest.clearAllMocks();
-    });
->>>>>>> 686b4bc (fix: docker compose build error for github actions, attempt 6)
-  });
-
-  const ctx = new RequestContext();
-
-  describe('uploadFile', () => {
-    it('should upload file successfully', async () => {
-      const file: Express.Multer.File = {
-        fieldname: 'fileField',
-        originalname: 'test.txt',
-        encoding: '7bit',
-        mimetype: 'text/plain',
-        size: 1024,
-        buffer: Buffer.from('test'),
-        stream: Readable.from('test'),
-        destination: 'file/path',
-        filename: 'test.txt',
-        path: 'sample path string',
-      };
-      ctx.user = {
-        id: 1,
-        roles: [ROLE.USER],
-        username: 'testuser',
-      };
-      const publicKey = 'mock-uuid';
-      const privateKey = 'mock-uuid';
-      const uniqueIdforFile = uuidv4();
-
-      const filePath = path.join(
-        'uploads',
-        `${uniqueIdforFile}-${file.originalname}`,
-      );
-      const uploadFileDetail = {
-        publicKey,
-        privateKey,
-        fileBuffer: file.buffer,
-        mimeType: file.mimetype,
-        filePath,
-        fileName: file.originalname,
+        storageType: 'local',
         createdBy: ctx.user!.id,
       };
       const output: FileUploadOutput = { publicKey, privateKey };

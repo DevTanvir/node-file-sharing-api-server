@@ -17,7 +17,7 @@ export class FileEntity {
   @Column('uuid')
   privateKey: string;
 
-  @Column('bytea')
+  @Column('bytea', { nullable: true })
   fileBuffer: Buffer;
 
   @CreateDateColumn({ name: 'createdAt', nullable: true })
@@ -29,11 +29,14 @@ export class FileEntity {
   @Column()
   mimeType: string;
 
-  @Column()
+  @Column({ nullable: true })
   filePath: string;
 
   @Column()
   fileName: string;
+
+  @Column()
+  storageType: string;
 
   @Column()
   createdBy: number;
