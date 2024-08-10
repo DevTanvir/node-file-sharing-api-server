@@ -6,13 +6,26 @@ import { SharedModule } from '../shared/shared.module';
 import { FileController } from './controllers/file.controller';
 import { FileEntity } from './entities/file.entity';
 import { FileRepository } from './repositories/file.repository';
-import { FileService } from './services/file.service';
 import { FileAclService } from './services/file-acl.service';
+import { GoogleStorageService } from './services/google-storage.service';
+import { LocalStorageService } from './services/local-storage.service';
 
 @Module({
   imports: [SharedModule, TypeOrmModule.forFeature([FileEntity])],
-  providers: [FileService, FileAclService, JwtAuthStrategy, FileRepository],
+  providers: [
+    LocalStorageService,
+    FileAclService,
+    JwtAuthStrategy,
+    FileRepository,
+    {
+      provide: 'IStorageService',
+      useClass:
+        process.env.PROVIDER === 'google'
+          ? GoogleStorageService
+          : LocalStorageService,
+    },
+  ],
   controllers: [FileController],
-  exports: [FileService],
+  exports: [LocalStorageService],
 })
 export class FileModule {}

@@ -3,7 +3,7 @@ import { Cron } from '@nestjs/schedule';
 import { promises as fs } from 'fs';
 import * as path from 'path';
 
-import { FileService } from '../file/services/file.service';
+import { LocalStorageService } from '../file/services/local-storage.service';
 
 @Injectable()
 export class CleanupService {
@@ -13,7 +13,7 @@ export class CleanupService {
     ? parseInt(process.env.CLEANUP_INTERVAL_HOURS, 10)
     : 24;
 
-  constructor(private readonly fileService: FileService) {}
+  constructor(private readonly localStorageService: LocalStorageService) {}
 
   @Cron('0 * * * *') // Run every hour
   async handleCleanup() {
@@ -28,7 +28,6 @@ export class CleanupService {
     for (const file of files) {
       const filePath = path.join(this.folder!, file);
       const stats = await fs.stat(filePath);
-      console.log('stats', stats);
 
       const lastModified = new Date(stats.mtime).getTime();
       const elapsedTimeHours = (now - lastModified) / (1000 * 60 * 60);
@@ -36,7 +35,7 @@ export class CleanupService {
       if (elapsedTimeHours > this.cleanupIntervalHours) {
         this.logger.log(`Deleting file: ${file}`);
         await fs.unlink(filePath);
-        await this.fileService.deleteFileForCleanupService(filePath);
+        await this.localStorageService.deleteFileForCleanupService(filePath);
       }
     }
   }

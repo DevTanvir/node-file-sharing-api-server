@@ -1,10 +1,10 @@
 import {
-  Body,
   ClassSerializerInterceptor,
   Controller,
   Delete,
   Get,
   HttpStatus,
+  Inject,
   Param,
   Post,
   Res,
@@ -31,15 +31,15 @@ import {
 import { AppLogger } from '../../shared/logger/logger.service';
 import { ReqContext } from '../../shared/request-context/req-context.decorator';
 import { RequestContext } from '../../shared/request-context/request-context.dto';
-import { UpdateEnvInput } from '../dtos/file-update-env-input.dto';
+// import { UpdateEnvInput } from '../dtos/file-update-env-input.dto';
 import { FileUploadOutput } from '../dtos/file-upload-output.dto';
-import { FileService } from '../services/file.service';
+import { IStorageService } from '../services/storage.interface';
 
 @ApiTags('files')
 @Controller('files')
 export class FileController {
   constructor(
-    private readonly fileService: FileService,
+    @Inject('IStorageService') private readonly storageService: IStorageService,
     private readonly logger: AppLogger,
   ) {}
 
@@ -69,8 +69,7 @@ export class FileController {
   ): Promise<BaseApiResponse<FileUploadOutput>> {
     this.logger.log(ctx, `${this.uploadFile.name} was called`);
 
-    const keys = await this.fileService.uploadFile(ctx, file);
-
+    const keys = await this.storageService.uploadFile(ctx, file);
     return { data: keys, meta: {} };
   }
 
@@ -93,13 +92,13 @@ export class FileController {
   })
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
-  async getFile(
+  async downloadFile(
     @ReqContext() ctx: RequestContext,
     @Param('publicKey') publicKey: string,
     @Res() res: any,
-  ): Promise<void> {
-    this.logger.log(ctx, `${this.getFile.name} was called`);
-    await this.fileService.downloadFile(publicKey, res);
+  ): Promise<any> {
+    this.logger.log(ctx, `${this.downloadFile.name} was called`);
+    await this.storageService.downloadFile(publicKey, res);
   }
 
   @Delete(':privateKey')
@@ -130,32 +129,7 @@ export class FileController {
   ): Promise<void> {
     this.logger.log(ctx, `${this.deleteFile.name} was called`);
 
-    const deleted = await this.fileService.deleteFile(ctx, privateKey);
-    return deleted;
-  }
-
-  @Post('update-env')
-  @ApiOperation({
-    summary: 'Update ENV file API (ADMIN ONLY)',
-  })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    type: SwaggerBaseApiResponse([]),
-  })
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
-  @ApiResponse({
-    status: HttpStatus.UNAUTHORIZED,
-    type: BaseApiErrorResponse,
-  })
-  async updateEnv(
-    @ReqContext() ctx: RequestContext,
-    @Body() input: UpdateEnvInput,
-  ): Promise<string> {
-    this.logger.log(ctx, `${this.updateEnv.name} was called`);
-
-    await this.fileService.updateEnv(ctx, input);
-
-    return 'Successfully updated .env file';
+    const output = await this.storageService.deleteFile(ctx, privateKey);
+    return output;
   }
 }
