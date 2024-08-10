@@ -3,7 +3,6 @@ import { Readable } from 'stream';
 
 import { AppLogger } from '../../shared/logger/logger.service';
 import { RequestContext } from '../../shared/request-context/request-context.dto';
-import { FileService } from '../services/file.service';
 import { FileController } from './file.controller';
 
 jest.mock('uuid', () => ({
@@ -13,7 +12,7 @@ jest.mock('uuid', () => ({
 describe('FileController', () => {
   let controller: FileController;
 
-  const mockedFileService = {
+  const mockedIStorageService = {
     uploadFile: jest.fn(),
     downloadFile: jest.fn(),
     deleteFile: jest.fn(),
@@ -25,7 +24,7 @@ describe('FileController', () => {
     const moduleRef: TestingModule = await Test.createTestingModule({
       controllers: [FileController],
       providers: [
-        { provide: FileService, useValue: mockedFileService },
+        { provide: 'IStorageService', useValue: mockedIStorageService },
         { provide: AppLogger, useValue: mockedLogger },
       ],
     }).compile();
@@ -40,7 +39,7 @@ describe('FileController', () => {
   const ctx = new RequestContext();
 
   describe('upload File', () => {
-    it('calls the uploadFile function with necessary input', () => {
+    it('calls the local uploadFile function with necessary input', async () => {
       const file: Express.Multer.File = {
         fieldname: 'fileField',
         originalname: 'test.txt',
@@ -53,24 +52,24 @@ describe('FileController', () => {
         filename: 'test.txt',
         path: 'sample path string',
       };
-      mockedFileService.uploadFile.mockResolvedValue({
+      mockedIStorageService.uploadFile.mockResolvedValue({
         key1: 'mock-uuid',
         key2: 'mock-uuid',
       });
-      controller.uploadFile(ctx, file);
-      expect(mockedFileService.uploadFile).toHaveBeenCalled();
+      await controller.uploadFile(ctx, file);
+      expect(mockedIStorageService.uploadFile).toHaveBeenCalled();
     });
   });
 
-  describe('Get user by id', () => {
+  describe('download file', () => {
     it('should call downloadFile with the correct parameters', async () => {
       const ctx = {} as RequestContext;
       const publicKey = 'testPublicKey';
       const res = {} as any;
 
-      await controller.getFile(ctx, publicKey, res);
+      await controller.downloadFile(ctx, publicKey, res);
 
-      expect(mockedFileService.downloadFile).toHaveBeenCalledWith(
+      expect(mockedIStorageService.downloadFile).toHaveBeenCalledWith(
         publicKey,
         res,
       );
@@ -84,7 +83,7 @@ describe('FileController', () => {
 
       await controller.deleteFile(ctx, privateKey);
 
-      expect(mockedFileService.deleteFile).toHaveBeenCalledWith(
+      expect(mockedIStorageService.deleteFile).toHaveBeenCalledWith(
         ctx,
         privateKey,
       );

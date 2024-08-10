@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -8,7 +9,6 @@ import { promises as fs } from 'fs';
 import * as path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 
-import { FileInterface } from '../../common/file.interface';
 import { Action } from '../../shared/acl/action.constant';
 import { Actor } from '../../shared/acl/actor.constant';
 import { AppLogger } from '../../shared/logger/logger.service';
@@ -17,9 +17,10 @@ import { UpdateEnvInput } from '../dtos/file-update-env-input.dto';
 import { FileUploadOutput } from '../dtos/file-upload-output.dto';
 import { FileRepository } from '../repositories/file.repository';
 import { FileAclService } from './file-acl.service';
+import { IStorageService } from './storage.interface';
 
 @Injectable()
-export class FileService implements FileInterface {
+export class LocalStorageService implements IStorageService {
   private readonly folder = process.env.FOLDER || 'uploads';
   private readonly envFilePath = '.env';
 
@@ -28,13 +29,17 @@ export class FileService implements FileInterface {
     private readonly aclService: FileAclService,
     private readonly logger: AppLogger,
   ) {
-    this.logger.setContext(FileService.name);
+    this.logger.setContext(LocalStorageService.name);
   }
 
   async uploadFile(
     ctx: RequestContext,
     file: Express.Multer.File,
   ): Promise<FileUploadOutput> {
+    if (!file) {
+      throw new BadRequestException('Please select a file to upload');
+    }
+
     const actor: Actor = ctx.user!;
 
     const isAllowed = this.aclService
@@ -61,6 +66,7 @@ export class FileService implements FileInterface {
       filePath,
       fileName: file.originalname,
       createdBy: ctx.user!.id,
+      storageType: 'local',
     };
 
     await this.fileRepository.save(uploadFileDetail);
