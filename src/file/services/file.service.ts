@@ -3,6 +3,7 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
+import * as dotenv from 'dotenv';
 import { promises as fs } from 'fs';
 import * as path from 'path';
 import { v4 as uuidv4 } from 'uuid';
@@ -12,6 +13,7 @@ import { Action } from '../../shared/acl/action.constant';
 import { Actor } from '../../shared/acl/actor.constant';
 import { AppLogger } from '../../shared/logger/logger.service';
 import { RequestContext } from '../../shared/request-context/request-context.dto';
+import { UpdateEnvInput } from '../dtos/file-update-env-input.dto';
 import { FileUploadOutput } from '../dtos/file-upload-output.dto';
 import { FileRepository } from '../repositories/file.repository';
 import { FileAclService } from './file-acl.service';
@@ -19,6 +21,7 @@ import { FileAclService } from './file-acl.service';
 @Injectable()
 export class FileService implements FileInterface {
   private readonly folder = process.env.FOLDER || 'uploads';
+  private readonly envFilePath = '.env';
 
   constructor(
     private readonly fileRepository: FileRepository,
@@ -46,7 +49,7 @@ export class FileService implements FileInterface {
     const uniqueIdforFile = uuidv4();
 
     const filePath = path.join(
-      this.folder,
+      this.folder!,
       `${uniqueIdforFile}-${file.originalname}`,
     );
 
@@ -102,5 +105,38 @@ export class FileService implements FileInterface {
     await fs.unlink(filePath);
 
     return { message: `File ${file.fileName} deleted successfully` };
+  }
+
+  async deleteFileForCleanupService(filePath: string): Promise<any> {
+    const file = await this.fileRepository.getByFilePath(filePath);
+    if (!file) {
+      throw new NotFoundException('File not found');
+    }
+
+    await this.fileRepository.delete(file.id);
+
+    return { message: 'File deleted successfully by clean up service' };
+  }
+
+  async updateEnv(ctx: RequestContext, input: UpdateEnvInput): Promise<string> {
+    const actor: Actor = ctx.user!;
+
+    const isAllowed = this.aclService
+      .forActor(actor)
+      .canDoAction(Action.Manage, input);
+    if (!isAllowed) {
+      throw new UnauthorizedException();
+    }
+    const envConfig = dotenv.parse(await fs.readFile(this.envFilePath));
+
+    envConfig[input.key] = input.value;
+
+    const newEnvContent = Object.keys(envConfig)
+      .map((k) => `${k}=${envConfig[k]}`)
+      .join('\n');
+
+    fs.writeFile(this.envFilePath, newEnvContent);
+
+    return `${input.key} updated successfully to ${input.value}`;
   }
 }
