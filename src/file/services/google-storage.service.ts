@@ -23,7 +23,7 @@ const storage = new Storage({
   projectId: process.env.GCS_PROJECT_ID,
   keyFilename,
 });
-const bucket = storage.bucket(bucketName!);
+const bucket = storage.bucket(bucketName || 'bucket_node-file-sharing-server');
 @Injectable()
 export class GoogleStorageService implements IStorageService {
   constructor(
