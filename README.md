@@ -2,6 +2,7 @@
 
 [![build](https://github.com/DevTanvir/node-file-sharing-api-server/actions/workflows/build-workflow.yml/badge.svg?branch=master&event=push)](https://github.com/DevTanvir/node-file-sharing-api-server/actions/workflows/build-workflow.yml)
 [![tests](https://github.com/DevTanvir/node-file-sharing-api-server/actions/workflows/tests-workflow.yml/badge.svg?branch=master&event=push)](https://github.com/DevTanvir/node-file-sharing-api-server/actions/workflows/tests-workflow.yml)
+[![Coverage Status](https://coveralls.io/repos/github/DevTanvir/node-file-sharing-api-server/badge.svg?branch=main)](https://coveralls.io/github/DevTanvir/node-file-sharing-api-server?branch=main)
 
 An implementation of nodejs file sharing api server
 
